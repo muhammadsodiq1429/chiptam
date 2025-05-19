@@ -1,8 +1,9 @@
-import { Prop, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ObjectId, HydratedDocument, Types } from "mongoose";
 
 export type CustomerDocument = HydratedDocument<Customer>;
 
+@Schema()
 export class Customer {
   @Prop({ required: true })
   first_name: string;
@@ -25,11 +26,14 @@ export class Customer {
   @Prop({ required: true })
   gender: "MALE" | "FEMALE";
 
-  @Prop({ required: true, type: Types.ObjectId })
+  @Prop({ type: Types.ObjectId })
   lang_id: Types.ObjectId;
 
   @Prop()
   hashed_refresh_token: string;
+
+  @Prop({ required: true, default: false })
+  is_active: boolean;
 }
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer);

@@ -12,6 +12,7 @@ import { AuthService } from "./auth.service";
 import { SignInDto } from "./dto/sign-in.dto";
 import { Response } from "express";
 import { CookieGetter } from "../common/decorators/cookie-getter.decorator";
+import { ObjectId } from "mongoose";
 
 @Controller("auth")
 export class AuthController {
@@ -36,13 +37,13 @@ export class AuthController {
   }
 
   @HttpCode(200)
-  @Post(":id/admin/refresh-tokens")
-  async refreshTokensAdmin(
+  @Post("admin/:id/refresh-tokens")
+  async refreshAdminTokens(
     @CookieGetter("refresh_token") refreshToken,
     @Param("id") id: string,
     @Res({ passthrough: true }) res: Response
   ) {
-    return this.authService.refreshTokensAdmin(id, refreshToken, res);
+    return this.authService.refreshAdminTokens(id, refreshToken, res);
   }
 
   @HttpCode(200)
@@ -51,25 +52,25 @@ export class AuthController {
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) res: Response
   ) {
-    return this.authService.signInAdmin(signInDto, res);
+    return this.authService.signInCustomer(signInDto, res);
   }
 
-  // @HttpCode(200)
-  // @Post("customer/sign-out")
-  // async signOutCustomer(
-  //   @CookieGetter("refresh_token") refreshToken,
-  //   @Res({ passthrough: true }) res: Response
-  // ) {
-  //   return this.authService.signOutCustomer(refreshToken, res);
-  // }
+  @HttpCode(200)
+  @Post("customer/sign-out")
+  async signOutCustomer(
+    @CookieGetter("refresh_token") refreshToken,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return this.authService.signOutCustomer(refreshToken, res);
+  }
 
-  // @HttpCode(200)
-  // @Post(":id/customer/refresh-tokens")
-  // async refreshTokensCustomer(
-  //   @CookieGetter("refresh_token") refreshToken,
-  //   @Param("id") id: string,
-  //   @Res({ passthrough: true }) res: Response
-  // ) {
-  //   return this.authService.refreshTokensCustomer(id, refreshToken, res);
-  // }
+  @HttpCode(200)
+  @Post("customer/:id/refresh-tokens")
+  async refreshTokensCustomer(
+    @CookieGetter("refresh_token") refreshToken,
+    @Param("id") id: ObjectId,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    return this.authService.refreshTokensCustomer(id, refreshToken, res);
+  }
 }

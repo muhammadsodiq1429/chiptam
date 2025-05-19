@@ -11,6 +11,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { Response } from "express";
 import { CustomerService } from "../customer/customer.service";
+import { ObjectId } from "mongoose";
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
   ) {}
 
   async generateTokens(payload: {}) {
+    // ✅
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.sign(payload, {
         secret: process.env.ACCESS_TOKEN_KEY,
@@ -36,6 +38,7 @@ export class AuthService {
   }
 
   async signInAdmin(signInDto: SignInDto, res: Response) {
+    // ✅
     const admin = await this.adminService.findByEmail(signInDto.email);
     if (!admin) throw new BadRequestException("Email or password incorrect");
 
@@ -46,7 +49,11 @@ export class AuthService {
     if (!isValidPassword)
       throw new BadRequestException("Email or password incorrect");
 
-    const { accessToken, refreshToken } = await this.generateTokens(admin);
+    const { accessToken, refreshToken } = await this.generateTokens({
+      id: admin.id,
+      is_creator: admin.is_creator,
+      is_active: admin.is_active,
+    });
 
     res.cookie("refresh_token", refreshToken, {
       maxAge: Number(process.env.COOKIE_REFRESH_TOKEN_TIME),
@@ -64,6 +71,7 @@ export class AuthService {
   }
 
   async signOutAdmin(refreshToken: string, res: Response) {
+    // ✅
     const adminData = await this.jwtService.verify(refreshToken, {
       secret: process.env.REFRESH_TOKEN_KEY,
     });
@@ -81,7 +89,8 @@ export class AuthService {
     };
   }
 
-  async refreshTokensAdmin(id: string, refresh_token: string, res: Response) {
+  async refreshAdminTokens(id: string, refresh_token: string, res: Response) {
+    // ✅
     const decodedToken = await this.jwtService.decode(refresh_token);
     if (decodedToken["id"] !== id)
       throw new UnauthorizedException("Unauthorized user");
@@ -96,7 +105,11 @@ export class AuthService {
     );
     if (!tokenMatch) throw new ForbiddenException("Forbidden user");
 
-    const { accessToken, refreshToken } = await this.generateTokens(admin);
+    const { accessToken, refreshToken } = await this.generateTokens({
+      id: admin.id,
+      is_creator: admin.is_creator,
+      is_active: admin.is_active,
+    });
 
     await admin.updateOne({
       hashed_refresh_token: await bcrypt.hash(refreshToken, 7),
@@ -114,88 +127,105 @@ export class AuthService {
     };
   }
 
-  // async signInCustomer(signInDto: SignInDto, res: Response) {
-  //   const customer = await this.customerService.findAny({
-  //     email: signInDto.email,
-  //   });
-  //   if (!customer) throw new BadRequestException("Email or password incorrect");
+  async signInCustomer(signInDto: SignInDto, res: Response) {
+    // ✅
+    const customer = await this.customerService.findAny({
+      email: signInDto.email,
+    });
 
-  //   const isValidPassword = await bcrypt.compare(
-  //     signInDto.password,
-  //     customer.
-  //   );
-  //   if (!isValidPassword)
-  //     throw new BadRequestException("Email or password incorrect");
+    if (!customer) throw new BadRequestException("Email or password incorrect");
 
-  //   const { accessToken, refreshToken } = await this.generateTokens(customer);
+    if (!customer.is_active)
+      throw new BadRequestException("Customer is not active");
 
-  //   res.cookie("refresh_token", refreshToken, {
-  //     maxAge: Number(process.env.COOKIE_REFRESH_TOKEN_TIME),
-  //     httpOnly: true,
-  //   });
+    const isValidPassword = await bcrypt.compare(
+      signInDto.password,
+      customer.hashed_password
+    );
+    if (!isValidPassword)
+      throw new BadRequestException("Email or password incorrect");
 
-  //   customer.hashed_refresh_token = await bcrypt.hash(refreshToken, 7);
-  //   await customer.save();
+    const { accessToken, refreshToken } = await this.generateTokens({
+      id: customer.id,
+      is_active: customer.is_active,
+      email: customer.email,
+    });
 
-  //   return {
-  //     success: true,
-  //     message: "Customer successfully signed in",
-  //     accessToken,
-  //   };
-  // }
+    res.cookie("refresh_token", refreshToken, {
+      maxAge: Number(process.env.COOKIE_REFRESH_TOKEN_TIME),
+      httpOnly: true,
+    });
 
-  // async signOutCustomer(refreshToken: string, res: Response) {
-  //   const customerData = await this.jwtService.verify(refreshToken, {
-  //     secret: process.env.REFRESH_TOKEN_KEY,
-  //   });
-  //   if (!customerData) throw new NotFoundException("Customer not found");
+    customer.hashed_refresh_token = await bcrypt.hash(refreshToken, 7);
+    await customer.save();
 
-  //   const customer = await this.customerService.findOne(customerData.id);
-  //   await customer.updateOne({ hashed_refresh_token: "" });
+    return {
+      success: true,
+      message: "Customer successfully signed in",
+      accessToken,
+    };
+  }
 
-  //   res.clearCookie("refresh_token");
+  async signOutCustomer(refreshToken: string, res: Response) {
+    // ✅
+    const customerData = await this.jwtService.verify(refreshToken, {
+      secret: process.env.REFRESH_TOKEN_KEY,
+    });
+    if (!customerData) throw new NotFoundException("Customer not found");
 
-  //   return {
-  //     success: true,
-  //     message: "Customer successfully signed out",
-  //     customerId: customer.id,
-  //   };
-  // }
+    const { customer } = await this.customerService.findOne(customerData.id);
+    await customer.updateOne({ hashed_refresh_token: "" });
 
-  // async refreshTokensCustomer(
-  //   id: string,
-  //   refresh_token: string,
-  //   res: Response
-  // ) {
-  //   const decodedToken = await this.jwtService.decode(refresh_token);
-  //   if (decodedToken["id"] !== id)
-  //     throw new UnauthorizedException("Unauthorized user");
+    res.clearCookie("refresh_token");
 
-  //   const customer = await this.customerService.findOne(id);
-  //   if (!customer.hashed_refresh_token)
-  //     throw new ForbiddenException("User not found");
+    return {
+      success: true,
+      message: "Customer successfully signed out",
+      customerId: customer.id,
+    };
+  }
 
-  //   const tokenMatch = await bcrypt.compare(
-  //     refresh_token,
-  //     customer.hashed_refresh_token
-  //   );
-  //   if (!tokenMatch) throw new ForbiddenException("Forbidden user");
+  async refreshTokensCustomer(
+    id: ObjectId,
+    refresh_token: string,
+    res: Response
+  ) {
+    const decodedToken = await this.jwtService.decode(refresh_token);
+    if (decodedToken["id"] !== id)
+      throw new UnauthorizedException("Unauthorized user");
 
-  //   const { accessToken, refreshToken } = await this.generateTokens(customer);
+    if (!decodedToken.is_active)
+      throw new BadRequestException("Customer is not active");
 
-  //   await customer.updateOne({
-  //     hashed_refresh_token: await bcrypt.hash(refreshToken, 7),
-  //   });
-  //   res.cookie("refresh_token", refreshToken, {
-  //     maxAge: Number(process.env.COOKIE_REFRESH_TOKEN_TIME),
-  //     httpOnly: true,
-  //   });
+    const { customer } = await this.customerService.findOne(id);
+    if (!customer.hashed_refresh_token)
+      throw new ForbiddenException("User not found");
 
-  //   return {
-  //     success: true,
-  //     message: "Customer tokens refreshed",
-  //     customerId: customer.id,
-  //     accessToken,
-  //   };
-  // }
+    const tokenMatch = await bcrypt.compare(
+      refresh_token,
+      customer.hashed_refresh_token
+    );
+    if (!tokenMatch) throw new ForbiddenException("Forbidden user");
+
+    const { accessToken, refreshToken } = await this.generateTokens({
+      id: customer.id,
+      is_active: customer.is_active,
+      email: customer.email,
+    });
+
+    await customer.updateOne({
+      hashed_refresh_token: await bcrypt.hash(refreshToken, 7),
+    });
+    res.cookie("refresh_token", refreshToken, {
+      maxAge: Number(process.env.COOKIE_REFRESH_TOKEN_TIME),
+      httpOnly: true,
+    });
+
+    return {
+      success: true,
+      message: "Customer tokens refreshed",
+      customerId: customer.id,
+      accessToken,
+    };
+  }
 }

@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { RegionModule } from './region/region.module';
 import { DistrictModule } from './district/district.module';
 import { CustomerModule } from './customer/customer.module';
+import { CustomerCardModule } from './customer_card/customer_card.module';
+import { CustomerAddressModule } from './customer_address/customer_address.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { CustomerModule } from './customer/customer.module';
     RegionModule,
     DistrictModule,
     CustomerModule,
+    CustomerCardModule,
+    CustomerAddressModule,
   ],
   controllers: [],
   providers: [],

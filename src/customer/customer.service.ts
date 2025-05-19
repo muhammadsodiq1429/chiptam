@@ -3,7 +3,7 @@ import { CreateCustomerDto } from "./dto/create-customer.dto";
 import { UpdateCustomerDto } from "./dto/update-customer.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { Customer } from "./schemas/customer.schema";
-import { Model } from "mongoose";
+import { Model, ObjectId } from "mongoose";
 import { ConflictException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 
@@ -15,6 +15,7 @@ export class CustomerService {
 
   async create(createCustomerDto: CreateCustomerDto) {
     const { email, phone, confirm_password, password } = createCustomerDto;
+
     if (await this.findAny({ email: email }))
       throw new ConflictException("Email already exists");
     if (await this.findAny({ phone: phone }))
@@ -35,7 +36,7 @@ export class CustomerService {
   }
 
   findAny(any: {}) {
-    return this.customerSchema.find(any);
+    return this.customerSchema.findOne(any);
   }
 
   async findAll() {
@@ -46,14 +47,14 @@ export class CustomerService {
     return { success: true, allCustomers };
   }
 
-  async findOne(id: string) {
+  async findOne(id: ObjectId) {
     const customer = await this.customerSchema.findById(id);
     if (!customer) throw new NotFoundException("Customer not found");
 
     return { success: true, customer };
   }
 
-  async update(id: string, updateCustomerDto: UpdateCustomerDto) {
+  async update(id: ObjectId, updateCustomerDto: UpdateCustomerDto) {
     const customer = await this.customerSchema.findByIdAndUpdate(
       id,
       updateCustomerDto
@@ -67,7 +68,7 @@ export class CustomerService {
     };
   }
 
-  async remove(id: string) {
+  async remove(id: ObjectId) {
     const customer = await this.customerSchema.findByIdAndDelete(id);
     if (!customer) throw new NotFoundException("Customer not found");
 
