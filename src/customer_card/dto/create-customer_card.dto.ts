@@ -7,12 +7,12 @@ import {
   IsString,
   Matches,
 } from "class-validator";
-import { ObjectId } from "mongoose";
+
 
 export class CreateCustomerCardDto {
   @IsString()
   @IsNotEmpty()
-  customer_id: ObjectId;
+  customer_id: string;
 
   @IsString()
   @IsNotEmpty()

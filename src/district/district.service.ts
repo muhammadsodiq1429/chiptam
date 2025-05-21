@@ -18,9 +18,6 @@ export class DistrictService {
   ) {}
 
   async create(createDistrictDto: CreateDistrictDto) {
-    if (!mongoose.isValidObjectId(createDistrictDto.region_id))
-      throw new BadRequestException("Region id is not valid object id");
-
     const region = await this.regionSchema.findById(
       createDistrictDto.region_id
     );
@@ -49,7 +46,8 @@ export class DistrictService {
   async findOne(id: string) {
     const district = await this.districtSchema
       .findById(id)
-      .populate("districts");
+      .populate("region_id");
+    // .populate("districts");
     if (!district) throw new NotFoundException("District not found");
 
     return { success: true, district };
@@ -68,7 +66,7 @@ export class DistrictService {
     };
   }
 
-  async remove(id: string) {  
+  async remove(id: string) {
     const deletedDistrict = await this.districtSchema.findByIdAndDelete(id);
 
     return {

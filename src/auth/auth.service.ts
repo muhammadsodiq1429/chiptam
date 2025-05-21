@@ -11,7 +11,7 @@ import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { Response } from "express";
 import { CustomerService } from "../customer/customer.service";
-import { ObjectId } from "mongoose";
+
 
 @Injectable()
 export class AuthService {
@@ -186,7 +186,7 @@ export class AuthService {
   }
 
   async refreshTokensCustomer(
-    id: ObjectId,
+    id: string,
     refresh_token: string,
     res: Response
   ) {

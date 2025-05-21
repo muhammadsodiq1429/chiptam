@@ -26,7 +26,11 @@ export class CustomerAddressService {
   }
 
   async findAll() {
-    const allCustomerAddresses = await this.customerAddressSchema.find();
+    const allCustomerAddresses = await this.customerAddressSchema
+      .find()
+      .populate("region_id")
+      .populate("district_id")
+      .populate("customer_id");
     if (allCustomerAddresses.length === 0)
       throw new NotFoundException("CustomerAddresses not found");
 
@@ -34,7 +38,11 @@ export class CustomerAddressService {
   }
 
   async findOne(id: string) {
-    const customerAddress = await this.customerAddressSchema.findById(id);
+    const customerAddress = await this.customerAddressSchema
+      .findById(id)
+      .populate("region_id")
+      .populate("district_id")
+      .populate("customer_id");
     if (!customerAddress)
       throw new NotFoundException("CustomerAddress not found");
 

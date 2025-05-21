@@ -1,4 +1,3 @@
-import { IsObjectIdPipe } from "@nestjs/mongoose";
 import {
   IsDateString,
   IsEmail,
@@ -9,7 +8,6 @@ import {
   IsString,
   IsStrongPassword,
 } from "class-validator";
-import { isValidObjectId, ObjectId } from "mongoose";
 
 export class CreateCustomerDto {
   @IsString()
@@ -45,5 +43,5 @@ export class CreateCustomerDto {
 
   @IsString()
   @IsOptional()
-  lang_id: ObjectId;
+  lang_id: string;
 }

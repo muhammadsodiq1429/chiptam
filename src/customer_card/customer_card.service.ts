@@ -3,7 +3,7 @@ import { CreateCustomerCardDto } from "./dto/create-customer_card.dto";
 import { UpdateCustomerCardDto } from "./dto/update-customer_card.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { CustomerCard } from "./schemas/customer_card.schema";
-import { isValidObjectId, Model } from "mongoose";
+import { Model } from "mongoose";
 import { NotFoundException } from "@nestjs/common";
 import { CustomerService } from "../customer/customer.service";
 
@@ -17,8 +17,7 @@ export class CustomerCardService {
 
   async create(createCustomerCardDto: CreateCustomerCardDto) {
     const { customer_id } = createCustomerCardDto;
-    if (!isValidObjectId(customer_id))
-      throw new BadRequestException("customer_id must be objectId");
+
     if (!(await this.customerService.findOne(customer_id))) {
       throw new BadRequestException(
         `Customer don't eixsts with id: ${customer_id} `
@@ -46,7 +45,9 @@ export class CustomerCardService {
   }
 
   async findOne(id: string) {
-    const customerCard = await this.customerCardSchema.findById(id);
+    const customerCard = await this.customerCardSchema
+      .findById(id)
+      .populate("customer_id");
     if (!customerCard) throw new NotFoundException("CustomerCard not found");
 
     return { success: true, customerCard };

@@ -3,7 +3,7 @@ import { CreateCustomerDto } from "./dto/create-customer.dto";
 import { UpdateCustomerDto } from "./dto/update-customer.dto";
 import { InjectModel } from "@nestjs/mongoose";
 import { Customer } from "./schemas/customer.schema";
-import { Model, ObjectId } from "mongoose";
+import { Model } from "mongoose";
 import { ConflictException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 
@@ -47,14 +47,14 @@ export class CustomerService {
     return { success: true, allCustomers };
   }
 
-  async findOne(id: ObjectId) {
+  async findOne(id: string) {
     const customer = await this.customerSchema.findById(id);
     if (!customer) throw new NotFoundException("Customer not found");
 
     return { success: true, customer };
   }
 
-  async update(id: ObjectId, updateCustomerDto: UpdateCustomerDto) {
+  async update(id: string, updateCustomerDto: UpdateCustomerDto) {
     const customer = await this.customerSchema.findByIdAndUpdate(
       id,
       updateCustomerDto
@@ -68,7 +68,7 @@ export class CustomerService {
     };
   }
 
-  async remove(id: ObjectId) {
+  async remove(id: string) {
     const customer = await this.customerSchema.findByIdAndDelete(id);
     if (!customer) throw new NotFoundException("Customer not found");
 

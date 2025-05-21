@@ -9,7 +9,7 @@ export class Region {
   @Prop()
   name: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.ObjectId, ref: "District" }] })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "District" }] })
   districts: District[];
 }
 

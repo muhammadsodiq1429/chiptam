@@ -16,7 +16,8 @@ export class RegionService {
   }
 
   async findAll() {
-    const allRegions = await this.regionSchema.find().populate("districts");
+    const allRegions =
+      await this.regionSchema.find(); /* .populate("districts"); */
     if (allRegions.length === 0)
       throw new NotFoundException("Regions not found");
 
@@ -24,7 +25,8 @@ export class RegionService {
   }
 
   async findOne(id: string) {
-    const region = await this.regionSchema.findById(id).populate("districts");
+    const region =
+      await this.regionSchema.findById(id); /* .populate("districts"); */
     if (!region) throw new NotFoundException("Region not found");
 
     return { success: true, region };

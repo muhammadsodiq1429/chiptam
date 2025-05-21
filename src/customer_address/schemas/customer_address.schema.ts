@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { HydratedDocument, ObjectId } from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 
 export type CustomerAddressDocument = HydratedDocument<CustomerAddress>;
 
@@ -10,20 +10,20 @@ export class CustomerAddress {
     ref: "Customer",
     required: true,
   })
-  customer_id: ObjectId;
+  customer_id: string;
 
   @Prop({ required: true })
   name: string;
 
   @Prop({ required: true, ref: "Region", type: mongoose.Schema.Types.ObjectId })
-  region_id: ObjectId;
+  region_id: string;
 
   @Prop({
     required: true,
     ref: "District",
     type: mongoose.Schema.Types.ObjectId,
   })
-  district_id: ObjectId;
+  district_id: string;
 
   @Prop({ required: true })
   street: string;

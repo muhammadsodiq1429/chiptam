@@ -12,7 +12,7 @@ import { AuthService } from "./auth.service";
 import { SignInDto } from "./dto/sign-in.dto";
 import { Response } from "express";
 import { CookieGetter } from "../common/decorators/cookie-getter.decorator";
-import { ObjectId } from "mongoose";
+
 
 @Controller("auth")
 export class AuthController {
@@ -68,7 +68,7 @@ export class AuthController {
   @Post("customer/:id/refresh-tokens")
   async refreshTokensCustomer(
     @CookieGetter("refresh_token") refreshToken,
-    @Param("id") id: ObjectId,
+    @Param("id") id: string,
     @Res({ passthrough: true }) res: Response
   ) {
     return this.authService.refreshTokensCustomer(id, refreshToken, res);

@@ -1,10 +1,10 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { ObjectId } from "mongoose";
+
 
 export class CreateCustomerAddressDto {
   @IsString()
   @IsNotEmpty()
-  customer_id: ObjectId;
+  customer_id: string;
 
   @IsString()
   @IsNotEmpty()
@@ -12,11 +12,11 @@ export class CreateCustomerAddressDto {
 
   @IsString()
   @IsNotEmpty()
-  region_id: ObjectId;
+  region_id: string;
 
   @IsString()
   @IsNotEmpty()
-  district_id: ObjectId;
+  district_id: string;
 
   @IsString()
   @IsNotEmpty()

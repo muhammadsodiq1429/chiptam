@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import { HydratedDocument } from "mongoose";
 
 export type CustomerCardDocument = HydratedDocument<CustomerCard>;
@@ -11,7 +11,7 @@ export class CustomerCard {
     ref: "Customer",
     required: true,
   })
-  customer_id: ObjectId;
+  customer_id: string;
 
   @Prop({ required: true })
   name: string;

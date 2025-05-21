@@ -10,5 +10,6 @@ import { Region, RegionSchema } from "./schemas/region.schema";
   ],
   controllers: [RegionController],
   providers: [RegionService],
+  exports: [RegionService],
 })
 export class RegionModule {}

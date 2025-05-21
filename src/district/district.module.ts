@@ -14,5 +14,6 @@ import { Region, RegionSchema } from "../region/schemas/region.schema";
   ],
   controllers: [DistrictController],
   providers: [DistrictService],
+  exports: [DistrictService],
 })
 export class DistrictModule {}
